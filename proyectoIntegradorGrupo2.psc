@@ -22,12 +22,15 @@ Algoritmo sistema_inventario
 	Definir salirDelSistema Como Logico;
 	
 	// Inicializamos variables
-	contador = 0;
-	cantMaxProducto = 2;
+	contador = 5;
+	cantMaxProducto = 5;
 	salirDelSistema = falso;
 	
 	Dimension producto[cantMaxProducto, 4];
 	Dimension nombreProducto[cantMaxProducto, 2];
+	
+	// Cargamos algunos productos por defecto
+	cargarProductos(producto, nombreProducto);
 	
 	// Mientras sea diferente a 0 pinto el menu, cuando sea 0 salgo del programa
 	Mientras salirDelSistema = falso Hacer
@@ -60,20 +63,22 @@ Funcion mostrarMenuPricipal (salirDelSistema Por Referencia, contador Por Refere
 	Escribir "3) Consultar detalles del producto";
 	Escribir "4) Vender productos";
 	Escribir "5) Ingresar productos";
+	Escribir "6) Consultar productos sin Stock";
 	Escribir "0) Salir";
 	
 	Leer opcionElegida;
 	
 	Segun opcionElegida
 		1: consultarInventario(producto , nombreProducto, contador);
-		2: consultarPrecio();
+		2: consultarPrecio(producto , nombreProducto, contador);
 		3: consultarDetalleProducto();
-		4: venderProducto();
+		4: venderProducto(producto, contador, nombreProducto);
 		5: ingresarProducto(contador, cantMaxProducto, producto, nombreProducto);
+		6: consultarProductosSinStock(producto , nombreProducto, contador);
 		0: salir(salirDelSistema);
 		De Otro Modo:
-			Mientras opcionElegida < 0 o opcionElegida  > 5 Hacer
-				Escribir "Por favor ingrese la opcion del 0 al 5.";
+			Mientras opcionElegida < 0 o opcionElegida  > 6 Hacer
+				Escribir "Por favor ingrese la opcion del 0 al 6.";
 				Leer opcionElegida;
 			FinMientras
 	FinSegun
@@ -82,12 +87,11 @@ FinFuncion
 // CONSULTAR INVENTARIO EXISTENCIA TOTAL
 Funcion consultarInventario(producto , nombreProducto, contador)
 	Borrar Pantalla
+	Escribir "               ---- INVENTARIO TIENDA ----";
 	Si contador = 0
-		Escribir "               ---- INVENTARIO TIENDA ----";
 		Escribir "  No hay productos en el inventario ";
 		Escribir "";
 	SiNo
-		Escribir "               ---- INVENTARIO TIENDA ----";
 		Escribir "  Ingrese la cantidad de artículos a listar (Posee", contador, " productos en el inventario)";
 		Escribir "";
 		
@@ -108,9 +112,37 @@ Funcion consultarInventario(producto , nombreProducto, contador)
 	presioneParaVolverAlMenuPrincipal();
 FinFuncion
 
+// CONSULTAR PRODUCTOS SIN STOCK
+Funcion consultarProductosSinStock(producto , nombreProducto, contador)
+	Borrar Pantalla
+	Escribir "               ---- CONSULTAR PRODUCTOS SIN STOCK ----";
+	Si contador = 0 Entonces
+		Escribir "  No hay productos en el inventario ";
+		Escribir "";
+	SiNo
+		Para contProd = 1 Hasta contador Con Paso 1 Hacer
+			si producto[contProd, 2] = 0 Entonces
+				Escribir "Codigo nº: ", producto[contProd, 1] , " - Precio $ ", producto[contProd, 3], " - Stock  ", producto[contProd, 2], " unidades"," - ",  "Nombre: ", nombreProducto[contProd,1]," - ",  "Categoria: ", nombreProducto[contProd,2];
+			FinSi
+		FinPara
+	FinSi
+	presioneParaVolverAlMenuPrincipal();
+FinFuncion
+
 // Consultar el precio de un producto determinado
-Funcion consultarPrecio()
-	
+Funcion consultarPrecio(producto , nombreProducto, contador)
+	Borrar Pantalla
+	Definir posicionProducto Como Entero;
+	posicionProducto = 0; 
+	Escribir "||||||||||||*******  CONSULTA DE PRECIOS  ********||||||||||||";
+	Escribir "";
+	Escribir "Por favor ingrese el codigo del producto que desea consultar";
+	Leer codigo;
+	posicionProducto = buscarProductoPorCodigo(producto, contador, codigo);
+	Si posicionProducto  <> 0 Entonces
+		Escribir "El precio del producto ",nombreProducto[posicionProducto, 1] , " es: ",  producto[posicionProducto, 3] ;
+	FinSi
+	presioneParaVolverAlMenuPrincipal();
 FinFuncion
 
 // Consultar todos los detalles de un producto en particular
@@ -119,8 +151,33 @@ Funcion consultarDetalleProducto()
 FinFuncion
 
 // Vender un determinado producto causando que se dismiya el stock del mismo
-Funcion venderProducto()
+Funcion venderProducto(producto Por Referencia, contador, nombreProducto)
+	Definir cantidadParaVender Como Entero;
+	Definir stockDelProducto Como Entero;
+	cantidadParaVender = 0;
 	Escribir "||||||||||||******  Menu de  Venta de Productos  ******||||||||||||";
+	Escribir "Por favor ingrese el codigo del producto que desea vender";
+	Leer codigo;
+	posicionProducto = buscarProductoPorCodigo(producto, contador, codigo);
+	Si posicionProducto  <> 0 Entonces
+		stockDelProducto = producto[posicionProducto, 2];
+		Si producto[posicionProducto, 2] = 0 Entonces
+			Escribir "Del prodcuto",nombreProducto[posicionProducto, 1] , " , no hay un stock";
+		SiNo
+			Escribir "Del prodcuto ",nombreProducto[posicionProducto, 1] , " hay un stock de ",  stockDelProducto ," con un precio unitario de " producto[posicionProducto, 3];
+			Escribir "Ingrese la cantidad que desea vender";
+			leer cantidadParaVender;
+			Si cantidadParaVender <= stockDelProducto Entonces
+				nuevoStock = stockDelProducto - cantidadParaVender; 
+				Escribir "Se vendera la cantidad de:  ", cantidadParaVender;
+				Escribir "Quedando un Stock del producto de: ", nuevoStock;
+				producto[posicionProducto, 2] = nuevoStock;
+			SiNo
+				Escribir " No posemos la cantidad de ", cantidadParaVender, " del producto en el stock ";
+			FinSi
+		FinSi
+	FinSi
+	presioneParaVolverAlMenuPrincipal();
 FinFuncion
 
 // Ingresar un determinado producto causando que se incremente el stock del mismo
@@ -128,7 +185,7 @@ Funcion ingresarProducto(contador Por Referencia, cantMaxProducto, producto Por 
 	Borrar Pantalla
 	Escribir "||||||||||||******  Menu de Ingreso de Productos  ******||||||||||||";
 	//Validacion de maximos productos
-	Si contador > cantMaxProducto
+	Si contador >= cantMaxProducto Entonces
 		Escribir "";
 		Escribir "Ha alcanzado la cantidad maxima de productos para ingresar";
 		presioneParaVolverAlMenuPrincipal();
@@ -139,6 +196,7 @@ Funcion ingresarProducto(contador Por Referencia, cantMaxProducto, producto Por 
 		Definir precio como entero;
 		Definir nombre como texto;
 		Definir categoria como texto;
+		Definir datosValidos como logica;
 		
 		// Inicializamos variables
 		codigo = 0;
@@ -146,8 +204,8 @@ Funcion ingresarProducto(contador Por Referencia, cantMaxProducto, producto Por 
 		precio = 0;
 		nombre = "";
 		categoria = "";
+		datosValidos = verdadero;
 		
-		Escribir "||||||||||||******  Menu de Ingreso de Productos  ******||||||||||||";
 		Escribir "Ingrese el codigo del Producto";
 		Leer codigo;
 		Escribir "Ingrese la cantidad del Producto";
@@ -162,12 +220,21 @@ Funcion ingresarProducto(contador Por Referencia, cantMaxProducto, producto Por 
 		Escribir "Usted ha ingresado el siguiente producto:";
 		Escribir "|COD|    |CANTIDAD|    |NOMBRE|          |PRECIO $ |       |CATEGORIA|";
 		Escribir " ",codigo, "       ", cantidad, "           ", nombre, "               ", precio, "                   ", categoria;
-		
-		guardarProducto(producto, nombreProducto, contador, codigo, cantidad, precio, nombre, categoria);
-		
-		presioneParaVolverAlMenuPrincipal();
+		si cantidad < 1 Entonces
+			Escribir "Usted ingreso una cantidad incorrecta, la cantidad debe estar entre 1 y ", cantMaxProducto;
+			datosValidos = Falso;
+		FinSi
+		si precio < 1 Entonces
+			Escribir "Usted ingreso un precio incorrecto, debe ser mayor a cero.";
+			datosValidos = Falso;
+		FinSi
+		si datosValidos = verdadero Entonces
+			guardarProducto(producto, nombreProducto, contador, codigo, cantidad, precio, nombre, categoria);
+		SiNo
+			Escribir "Ha ingresado datos incorrectos, por lo cual no se guardo el producto";
+		FinSi
 	FinSi
-	
+		presioneParaVolverAlMenuPrincipal();	
 FinFuncion
 
 // Guardando en el diccionario de datos del producto
@@ -190,10 +257,8 @@ Funcion guardarProducto(producto Por Referencia, nombreProducto Por Referencia, 
 			Escribir"El producto se ha guardado con exito";
 		2: Escribir"El producto no se guardo";
 		De Otro Modo:
-			Mientras opcionGuardar < 1 o opcionElegida  > 2 Hacer
-				Escribir "Por favor ingrese 1 para guardar o 2 para cancelar";
-				Leer opcionElegida;
-			FinMientras
+			Escribir "La opcion ingresada es incorrecta, no se guardo el producto";
+			presioneParaVolverAlMenuPrincipal();	
 	FinSegun
 FinFuncion
 
@@ -211,4 +276,60 @@ Funcion presioneParaVolverAlMenuPrincipal()
 	Escribir "Presione una tecla para volver al Menu principal";
 	Esperar tecla
 	Borrar Pantalla
+FinFuncion
+
+
+// Busca los productos por codigos y retorna la posicion donde esta el producto
+Funcion posicionProducto = buscarProductoPorCodigo(producto, contador, codigo)
+	Definir recorrerInventario Como Entero;
+	recorrerInventario=1;
+	posicionProducto = 0;
+	//evaluo dos condiciones: Hasta que: no encuentre el producto (posicionProducto = 0) y el recorrido del producto es menor o igual al maximo del prdoctos que hay guardados en el vector hacer
+	Mientras posicionProducto = 0 y recorrerInventario <= contador Hacer 
+		// Si el codigo ingresado es igual al producto que estoy recorriendo en ese momento entonces 
+		Si codigo = producto[recorrerInventario, 1] Entonces 
+			//asignamos la posicion encontrada
+			posicionProducto = recorrerInventario; 
+		FinSi
+		recorrerInventario = recorrerInventario + 1;
+	FinMientras
+	Si posicionProducto = 0 Entonces
+		Escribir "No se encontro el producto en el inventario";
+		Escribir "";
+	FinSi
+FinFuncion
+
+// Vector de productos cargados con un ejemplo de 5 productos
+Funcion cargarProductos(producto Por Referencia, nombreProducto Por Referencia)
+	
+	producto[1, 1] = 1111; // codigo
+	producto[1, 2] = 2; // cantidad
+	producto[1, 3] = 100; // precio
+	nombreProducto[1, 1] = "caramelo";
+	nombreProducto[1, 2] = "dulces";
+	
+	producto[2, 1] = 2222; // codigo
+	producto[2, 2] = 2; // cantidad
+	producto[2, 3] = 200; // precio
+	nombreProducto[2, 1] = "chupetin";
+	nombreProducto[2, 2] = "dulces";
+	
+	producto[3, 1] = 3333; // codigo
+	producto[3, 2] = 2; // cantidad
+	producto[3, 3] = 300; // precio
+	nombreProducto[3, 1] = "gomitas";
+	nombreProducto[3, 2] = "dulces";
+	
+	producto[4, 1] = 4444; // codigo
+	producto[4, 2] = 0; // cantidad
+	producto[4, 3] = 400; // precio
+	nombreProducto[4, 1] = "alfajor";
+	nombreProducto[4, 2] = "dulces";
+	
+	producto[5, 1] = 5555; // codigo
+	producto[5, 2] = 0; // cantidad
+	producto[5, 3] = 500 // precio
+	nombreProducto[5, 1] = "galleta";
+	nombreProducto[5, 2] = "dulces";
+	
 FinFuncion
