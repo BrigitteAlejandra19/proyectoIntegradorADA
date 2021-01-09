@@ -90,8 +90,8 @@ Funcion mostrarMenuPricipal (salirDelSistema Por Referencia, contador Por Refere
 		3: venderProducto(producto, contador, nombreProducto);
 		4: ingresarProducto(contador, cantMaxProducto, producto, nombreProducto);
 		5: consultarProductosSinStock(producto , nombreProducto, contador);
-		6: consultarProductosMasEconomicos(producto , nombreProducto, cantMaxProducto, 3);
-		7: consultarProductosMasCostosos(producto , nombreProducto, cantMaxProducto, 3);
+		6: consultarProductosMasEconomicos(producto , nombreProducto, contador, 3);
+		7: consultarProductosMasCostosos(producto , nombreProducto, contador, 3);
 		0: salir(salirDelSistema);Borrar Pantalla
 		De Otro Modo:
 			Mientras opcionElegida < 0 o opcionElegida  > 7 Hacer
@@ -354,18 +354,20 @@ Funcion cargarProductos(producto Por Referencia, nombreProducto Por Referencia)
 	
 FinFuncion
 
-Funcion consultarProductosMasEconomicos(producto, nombreProducto, cantMaxProducto, listarProductos)
-	ordenarProductosPorPrecio(producto, nombreProducto, cantMaxProducto);
+Funcion consultarProductosMasEconomicos(producto Por Referencia, nombreProducto Por Referencia, contador, listarProductos)
+	ordenarProductosPorPrecio(producto, nombreProducto, contador);
 	imprimirProductosAscendente(listarProductos, producto, nombreProducto);
+	presioneParaVolverAlMenuPrincipal();
 FinFuncion
-
-Funcion consultarProductosMasCostosos(producto Por Referencia, nombreProducto Por Referencia, cantMaxProducto, listarProductos)
-	ordenarProductosPorPrecio(producto, nombreProducto, cantMaxProducto);
-	imprimirProductosDescendente(listarProductos, producto, nombreProducto, cantMaxProducto);
+	
+Funcion consultarProductosMasCostosos(producto Por Referencia, nombreProducto Por Referencia, contador, listarProductos)
+	ordenarProductosPorPrecio(producto, nombreProducto, contador);
+	imprimirProductosDescendente(listarProductos, producto, nombreProducto, contador);
+	presioneParaVolverAlMenuPrincipal();
 FinFuncion
 
 //IMPRIMIR PRODUCTOS DEL 1 al 30
-Funcion imprimirProductosAscendente(listarProductos, producto, nombreProducto)
+Funcion imprimirProductosAscendente(listarProductos, producto Por Referencia, nombreProducto Por Referencia)
 	Borrar Pantalla
 	Escribir "||||||||||*****  Productos   ******||||||||||";
 	Escribir "";
@@ -377,22 +379,23 @@ Funcion imprimirProductosAscendente(listarProductos, producto, nombreProducto)
 FinFuncion
 
 //IMPRIMIR PRODUCTOS DEL 1 al 30
-Funcion imprimirProductosDescendente(listarProductos, producto, nombreProducto, cantMaxProducto)
+Funcion imprimirProductosDescendente(listarProductos, producto Por Referencia, nombreProducto Por Referencia, contador)
 	Borrar Pantalla
 	Escribir "||||||||||*****  Los 3 Productos mas costosos son  ******||||||||||";
+	Definir k como entero;
 	Escribir "";
-	k = cantMaxProducto;
+	k = contador;
 	Para contProd = 1 Hasta listarProductos Con Paso 1 Hacer
 		Escribir "Codigo nº: ", producto[k, 1] , " - Precio $ ", producto[k, 3], " - Stock  ", producto[k, 2], " unidades"," - ",  "Nombre: ", nombreProducto[k,1]," - ",  "Categoria: ", nombreProducto[k,2];
-		k = k -1;
+		k = contador - contProd;
 	FinPara
 	Escribir "";
 FinFuncion
 
 // ORDENA POR PRECIO
-Funcion ordenarProductosPorPrecio(producto, nombreProducto, cantMaxProducto) 
-	Para contador = 1 hasta (cantMaxProducto-1) Hacer
-		Para nroActual = 1 hasta (cantMaxProducto-1) Hacer
+Funcion ordenarProductosPorPrecio(producto Por Referencia, nombreProducto Por Referencia, contador) 
+	Para iterador = 1 hasta (contador-1) Hacer
+		Para nroActual = 1 hasta (contador-1) Hacer
 			Si producto[nroActual,3] > producto[nroActual+1,3] Entonces
 				variableAuxiliar1 = producto[nroActual,1];
 				variableAuxiliar2 = producto[nroActual,2];
@@ -409,7 +412,7 @@ Funcion ordenarProductosPorPrecio(producto, nombreProducto, cantMaxProducto)
 				// Ordena nombre y categoria 
 				nombreProducto[nroActual,1] = nombreProducto[nroActual+1,1];
 				nombreProducto[nroActual,2] = nombreProducto[nroActual+1,2];
-				nombreProducto[nroActual+1,1] = variableAuxiliarNombre;
+				nombreProducto[nroActual+1,1] = variableAuxiliarNombre1;
 				nombreProducto[nroActual+1,2] = variableAuxiliarNombre2;
 
 			FinSi
